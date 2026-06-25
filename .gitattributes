@@ -1,0 +1,16 @@
+# 强制 Windows 脚本用 CRLF 换行符(cmd.exe 严格要求)
+*.bat        text eol=crlf
+*.cmd        text eol=crlf
+*.ps1        text eol=crlf
+# 通用文本文件 LF(跨平台一致)
+*.py         text eol=lf
+*.sh         text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.json       text eol=lf
+*.md         text eol=lf
+*.txt        text eol=lf
+# 二进制保持原样
+*.png        binary
+*.jpg        binary
+*.ico        binary

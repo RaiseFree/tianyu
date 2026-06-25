@@ -50,19 +50,21 @@ if !MAJOR! GEQ 4 (
 
 REM ---------- 2. 建/复用 venv ----------
 echo.
-echo [2/5] 准备 venv...
-if not exist build_venv\Scripts\python.exe (
-    echo       正在创建 venv(首次约 30 秒)...
-    python -m venv build_venv
-    if errorlevel 1 (
-        echo [错误] venv 创建失败
-        if !INTERACTIVE!==1 pause
-        exit /b 1
-    )
-) else (
-    echo       venv 已存在,复用
+echo [2/5] 准备 venv
+if not exist "build_venv\Scripts\python.exe" goto CREATE_VENV
+echo       venv 已存在,复用
+goto VENV_READY
+
+:CREATE_VENV
+echo       正在创建 venv（首次约 30 秒）
+python -m venv build_venv
+if errorlevel 1 (
+    echo [错误] venv 创建失败
+    if %INTERACTIVE%==1 pause
+    exit /b 1
 )
 
+:VENV_READY
 set PY="%~dp0build_venv\Scripts\python.exe"
 
 REM ---------- 3. 装依赖 ----------

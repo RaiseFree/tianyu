@@ -16,8 +16,10 @@ jobs:
       CI: 1  # 让 build_windows.bat 进入静默模式(不 pause)
 
     steps:
-      - name: 检出代码
+      - name: 检出代码(保留原始 CRLF)
         uses: actions/checkout@v7
+        with:
+          autocrlf: false
 
       - name: 设置 Python 3.11
         uses: actions/setup-python@v6
