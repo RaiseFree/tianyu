@@ -1,0 +1,58 @@
+# ============================================================
+# 订单匹配工具 - Git 忽略规则
+# 只保留打包相关代码入仓,其余全部屏蔽
+# ============================================================
+
+# ---- Python 编译缓存 ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ---- PyInstaller 产物 ----
+dist/
+build/
+*.spec
+
+# ---- 打包环境(venv) ----
+build_venv/
+venv/
+.venv/
+env/
+
+# ---- 数据文件(可能含业务敏感数据) ----
+*.xlsx
+*.xls
+*.csv
+data/
+
+# ---- 调试/临时脚本(非打包核心) ----
+match_orders.py
+match_plate_orders.py
+match_violation.py
+
+# ---- macOS 系统垃圾 ----
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# ---- Windows 系统垃圾 ----
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- IDE/编辑器配置 ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---- 日志 ----
+*.log
+
+# ---- 环境变量/凭证(以防万一) ----
+.env
+.env.local
