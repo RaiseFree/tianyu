@@ -1,0 +1,41 @@
+name: Build Windows EXE
+
+# 触发条件:
+#   1. push 到 main / master 分支时自动跑
+#   2. 手动在 Actions 页面点 "Run workflow" 也行
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest  # 微软托管的 Windows runner(免费)
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 装依赖
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PySide6 openpyxl pyinstaller
+
+      - name: 跑打包脚本
+        shell: cmd
+        run: build_windows.bat
+
+      - name: 上传 .exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: 订单匹配工具-Windows
+          path: dist/订单匹配工具.exe
+          if-no-files-found: error
+          retention-days: 30
