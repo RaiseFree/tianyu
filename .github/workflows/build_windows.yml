@@ -12,6 +12,9 @@ jobs:
   build:
     runs-on: windows-latest  # 微软托管的 Windows runner(免费)
 
+    env:
+      CI: 1  # 让 build_windows.bat 进入静默模式(不 pause)
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v7
@@ -31,10 +34,22 @@ jobs:
         shell: cmd
         run: build_windows.bat
 
-      - name: 上传 .exe
+      - name: 上传 .exe(始终上传,即便上一步失败)
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: 订单匹配工具-Windows
           path: dist/订单匹配工具.exe
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
+
+      - name: 上传打包日志(失败排查用)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-log
+          path: |
+            build/
+            订单匹配工具.spec
+          if-no-files-found: ignore
+          retention-days: 7

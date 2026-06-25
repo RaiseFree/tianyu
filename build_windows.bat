@@ -1,29 +1,36 @@
 @echo off
 REM ============================================================
 REM   订单匹配工具 - Windows 10/11 打包脚本
-REM   双击运行,自动建 venv + 装依赖 + PyInstaller 打包
+REM   支持两种运行方式:
+REM     1) 双击 .bat(交互模式,失败会 pause 让你看)
+REM     2) CI / GitHub Actions 调用(静默模式,环境变量 CI=1)
 REM   产物:dist\订单匹配工具.exe
 REM ============================================================
 
 setlocal enabledelayedexpansion
 chcp 65001 > nul
 
+REM CI 模式检测
+if "%CI%"=="1" (
+    set "INTERACTIVE=0"
+) else (
+    set "INTERACTIVE=1"
+)
+
 REM 切到脚本所在目录
 cd /d "%~dp0"
 
 echo.
 echo ============================================================
-echo   订单匹配工具 - Windows 打包
+echo   订单匹配工具 - Windows 打包 (CI=!INTERACTIVE!)
 echo ============================================================
 echo.
 
 REM ---------- 1. 找 Python ----------
 where python >nul 2>&1
 if errorlevel 1 (
-    echo [错误] 没找到 python,请先安装 Python 3.11 或 3.12
-    echo 下载地址:https://www.python.org/downloads/windows/
-    echo 安装时务必勾选 "Add Python to PATH"
-    pause
+    echo [错误] 没找到 python
+    if !INTERACTIVE!==1 pause
     exit /b 1
 )
 
@@ -37,7 +44,7 @@ for /f "tokens=1,2 delims=." %%a in ("!PY_VER!") do (
 )
 if !MAJOR! GEQ 4 (
     echo [错误] Python !PY_VER! 不支持,请装 3.11 或 3.12
-    pause
+    if !INTERACTIVE!==1 pause
     exit /b 1
 )
 
@@ -49,7 +56,7 @@ if not exist build_venv\Scripts\python.exe (
     python -m venv build_venv
     if errorlevel 1 (
         echo [错误] venv 创建失败
-        pause
+        if !INTERACTIVE!==1 pause
         exit /b 1
     )
 ) else (
@@ -62,11 +69,11 @@ REM ---------- 3. 装依赖 ----------
 echo.
 echo [3/5] 安装依赖(首次约 2-3 分钟)...
 !PY! -m pip install --upgrade pip --quiet
-!PY! -m pip install PySide6 openpyxl pyinstaller --quiet
+!PY! -m pip install -r requirements.txt --quiet
 if errorlevel 1 (
-    echo [错误] 依赖安装失败,请检查网络或用国内镜像
-    echo 镜像命令:!PY! -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple PySide6 openpyxl pyinstaller
-    pause
+    echo [错误] 依赖安装失败
+    echo 镜像命令:!PY! -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+    if !INTERACTIVE!==1 pause
     exit /b 1
 )
 echo       依赖就绪
@@ -148,8 +155,8 @@ if exist 订单匹配工具.spec del 订单匹配工具.spec
 
 if errorlevel 1 (
     echo.
-    echo [错误] 打包失败,见上方日志
-    pause
+    echo [错误] 打包失败
+    if !INTERACTIVE!==1 pause
     exit /b 1
 )
 
@@ -166,8 +173,5 @@ if exist dist\订单匹配工具.exe (
     for %%f in (dist\订单匹配工具.exe) do echo   文件大小:%%~zf 字节(~ %%~zf / 1048576 MB)
 )
 
-echo.
-echo 直接双击 dist\订单匹配工具.exe 即可运行
-echo.
-pause
+if !INTERACTIVE!==1 pause
 endlocal
