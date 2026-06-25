@@ -30,9 +30,17 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: 跑打包脚本
+      - name: 跑打包脚本(全量日志落盘,失败不阻断)
         shell: cmd
-        run: build_windows.bat
+        continue-on-error: true
+        run: |
+          if not exist logs mkdir logs
+          build_windows.bat > logs\build.log 2>&1
+          echo ---EXIT CODE: %ERRORLEVEL%--- >> logs\build.log
+          echo ---WORKING DIR: %CD%--- >> logs\build.log
+          echo ---FILES:--- >> logs\build.log
+          dir /s >> logs\build.log
+          type logs\build.log
 
       - name: 上传 .exe(始终上传,即便上一步失败)
         if: always()
@@ -43,13 +51,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: 上传打包日志(失败排查用)
+      - name: 上传完整日志(失败排查用,必传)
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: build-log
-          path: |
-            build/
-            订单匹配工具.spec
-          if-no-files-found: ignore
+          path: logs/build.log
+          if-no-files-found: error
           retention-days: 7
